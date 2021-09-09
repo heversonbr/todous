@@ -1,0 +1,98 @@
+= Notes on building REST APIs with Node.js
+
+== REST API 
+
+keep in mind resource CRUD (create, read, update, delete).
+
+
+== Installing node.js 
+
+Node.js can be installed in different ways.
+Official packages for all the major platforms are available at https://nodejs.dev/download/.
+One very convenient way to install Node.js is through a package manager. In this case, every operating system has its own ( https://nodejs.dev/download/package-manager/).
+
+`nvm` (Node Version Manager) is a popular way to run Node.js. `nvm` is a version manager for node.js, designed to be installed per-user, and invoked per-shell. It allows you to easily switch the Node.js version, and install new versions to try and easily rollback if something breaks.
+
+
+Install `nvm` with Homebrew
+----
+$ brew install nvm
+----
+
+Install node
+----
+$ nvm install node
+----
+
+When Node.js is installed you'll have access to the `node` executable program in the command line.
+
+----
+$ node -v 
+v16.3.0
+----
+
+== Modulos
+
+=== Using package.json
+
+package.json is present in the root directory of any Node application/module and is used to define the properties of a package. Attributes of Package.json: 
+
+* name − name of the package
+* version − version of the package
+* description − description of the package
+* homepage − homepage of the package
+* author − author of the package
+* contributors − name of the contributors to the package
+* dependencies − list of dependencies. NPM automatically installs all the dependencies mentioned here in the node_module folder of the package.
+* repository − repository type and URL of the package
+* main − entry point of the package
+* keywords − keywords
+
+=== Installing/Uninstalling Modules using NPM
+
+----
+$ npm install <module_name>
+$ npm uninstall <module_name>
+----
+
+List installed modules: 
+
+----
+$ npm ls -g
+----
+
+Updating a module: 
+----
+$ npm update <module_name>
+----
+
+=== Global vs Local Installation
+
+By default, NPM installs any dependency in the local mode. Here local mode refers to the package installation in node_modules directory lying in the folder where Node application is present. Locally deployed packages are accessible via require() method.
+
+
+== Important modules fand tools or REST API development 
+
+* express 
+----
+$ npm install --save express
+----
+
+* Postman : is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streamlines collaboration so you can create better APIs—faster.
+
+----
+$ brew install --cask postman
+----
+
+
+
+
+
+== Creating a REST API with node.js 
+
+. Create a new app/module 
+----
+$ npm init 
+----
+
+
