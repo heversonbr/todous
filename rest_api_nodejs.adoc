@@ -8,24 +8,29 @@ keep in mind resource CRUD (create, read, update, delete).
 == Installing node.js 
 
 Node.js can be installed in different ways.
-Official packages for all the major platforms are available at https://nodejs.dev/download/.
-One very convenient way to install Node.js is through a package manager. In this case, every operating system has its own ( https://nodejs.dev/download/package-manager/).
+Official packages for all the major platforms are available at link:https://nodejs.dev/download/.
+One very convenient way to install Node.js is through a package manager. In this case, every operating system has its own (check it link:https://nodejs.dev/download/package-manager/[here]).
 
 `nvm` (Node Version Manager) is a popular way to run Node.js. `nvm` is a version manager for node.js, designed to be installed per-user, and invoked per-shell. It allows you to easily switch the Node.js version, and install new versions to try and easily rollback if something breaks.
 
 
 Install `nvm` with Homebrew
+
+[source, bash]
 ----
 $ brew install nvm
 ----
 
 Install node
+
+[source, bash]
 ----
 $ nvm install node
 ----
 
 When Node.js is installed you'll have access to the `node` executable program in the command line.
 
+[source, bash]
 ----
 $ node -v 
 v16.3.0
@@ -49,19 +54,20 @@ package.json is present in the root directory of any Node application/module and
 * keywords − keywords
 
 === Installing/Uninstalling Modules using NPM
-
+[source, bash]
 ----
 $ npm install <module_name>
 $ npm uninstall <module_name>
 ----
 
 List installed modules: 
-
+[source, bash]
 ----
 $ npm ls -g
 ----
 
 Updating a module: 
+[source, bash]
 ----
 $ npm update <module_name>
 ----
@@ -71,19 +77,135 @@ $ npm update <module_name>
 By default, NPM installs any dependency in the local mode. Here local mode refers to the package installation in node_modules directory lying in the folder where Node application is present. Locally deployed packages are accessible via require() method.
 
 
-== Important modules fand tools or REST API development 
+== Intersting/important modules and tools or REST API development 
 
-* express 
+=== express 
+
+[source, bash]
 ----
 $ npm install --save express
 ----
 
-* Postman : is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streamlines collaboration so you can create better APIs—faster.
+=== Postman 
 
+Postman is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streamlines collaboration so you can create better APIs—faster.
+[source, bash]
 ----
 $ brew install --cask postman
 ----
+ 
+=== Nodemon
 
+Nodemon is a utility that will monitor for any changes in your source and automatically restart your server. Perfect for development.
+[source, bash]
+----
+$ npm install --save-dev nodemon
+----
+
+Now in order to start the server, instead of using `node server.js` we will use `nodemon server.js` (for global install).
+
+Note that, if nodemon is not globally install we have to add the nodemon execution as an script in the `package.json` file. To do that, go to the 'scripts section' in the `package.json` file and add the following:
+
+[source, json]
+----
+"start": "nodemon server.js"
+----
+
+Then we will start our serve using `npm start`.
+
+=== Morgan 
+
+Morgan npm is used to log requests and other aspects of your web application built on Express (or any of the similarly architected frameworks around). So what can Morgan do for you?
+
+* It provides flexibility in defining the format of log messages
+* It allows you to overwrite the output destination for your logs
+
+In order to install Morgan:
+
+[source, bash]
+----
+$ npm install morgan --save
+----
+
+Then, add: 
+
+----
+const morgan = require('morgan') 
+app.use(morgan('dev'))
+----
+ 
+to your app entry point ('app.js').
+
+
+You have five predefined formats that you can use in order to easily get the info you need. They are:
+
+* “combined”: which gives you the Apache standard combined format for your logs.
+* “common”: referencing the Apache standard common format.
+* “dev”: A color-coded (by request status) log format.
+* “short”: Shorter than the default format, including just the few items you’d expect a request logline would have.
+* “tiny”: Even shorter, just the response time and a few extra items.
+
+
+=== body-parser
+
+Parse the body of incoming request in a middleware before your handlers, available under the req.body property.
+It makes it easy to read the requests. 
+
+----
+$ npm install --save body-parser
+----
+
+Then, add: 
+
+----
+var bodyParser = require('body-parser')
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
+----
+ 
+to your app entrypoint ('app.js').
+
+
+More about this package: link:https://www.npmjs.com/package/body-parser[here]
+
+=== mongodb 
+
+
+MongoDB is a document database designed for ease of development and scaling. 
+In this tutorial we will use MongoDB as our application's database. 
+
+Deploying MongoDB with docker. Offical image  link:https://hub.docker.com/_/mongo/[here]
+
+----
+$ docker run -d -p 27017:27017 -v  $(pwd)/data/db:/data/db -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=admin --name mymongo mongo
+----
+
+MongoDB on mac osx with brew: link:https://attacomsian.com/blog/install-mongodb-macos
+
+MongoDB Compass is a powerful GUI for querying, aggregating, and analyzing your MongoDB data in a visual environment.
+Compass is free to use and source available, and can be run on macOS, Windows, and Linux.
+Install MongoDB Compass on mac os with brew: 
+
+----
+$ brew install mongodb-compass
+----
+
+After running the docker container with mongodb, use the following connection string, in order to connect to the database:
+
+`mongodb://MONGO_INITDB_ROOT_USERNAME:MONGO_INITDB_ROOT_PASSWORD@localhost:27017`
+
+
+==== Mongoose 
+
+Mongoose is a MongoDB object modeling tool designed to work in an asynchronous environment. Mongoose supports both promises and callbacks.
+
+----
+$ npm install mongoose --save 
+----
 
 
 
