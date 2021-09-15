@@ -1,22 +1,26 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan'); 
 const bodyParser = require('body-parser');
 const todosRouter = require('./api/routes/todos');
 const todoTaskRouter = require('./api/routes/todos_task');
 const mongoose = require('mongoose');
-
-// const mongoose = require("../database");
-
 const app = express();
 
 
 // Connect to DB 
 // ex: mongoose.connect('mongodb://localhost:27017/mongoose_basics');
 //1) 
+
 mongoose.connect(process.env.DB_URL, 
     function (err) {
-        if (err) throw err;
-        console.log('Successfully connected');
+        
+        if (err) {
+            console.log('Error connecting to mongodb');
+            throw err;
+        };
+
+        console.log('Connected to mongodb');
 });
 // 2)
 // mongoose.connect(process.env.DB_URL, {

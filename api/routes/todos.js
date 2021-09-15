@@ -3,30 +3,39 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Todos = require('../models/todos');
 
-
 // Routing refers to determining how an application responds to a client request to a particular endpoint, which is a URI (or path) and a specific HTTP request method (GET, POST, and so on).
 // Each route can have one or more handler functions, which are executed when the route is matched.
 // I want something like this: 
-//  /todos                         : all todo-lists
-//  /todos/todos-id/               : one specific todo-list
-//  /todos/todos-id/full           : all elements of a specific todo list 
-//  /todos/todos-id/todo-item-id/  : a specific element of a specific todo list
+//  /api/todos                         : all todo-lists
+//  /api/todos/:todos_id               : one specific todo-list
+
 // Remind: each model is associated with one collection (table) in the database.
 //         so, we will create 2 routes here one for each table.
 
-// Remind: this is the get http that the api server will receive from the browser
 router.get('/todos/', (req, res, next) => { 
+// Remind: this is the get http that the api server will receive from the browser
   
         Todos.find()
+            .select('id title description') 
             .exec()
             .then( docs => {
                 // console.log(docs);
+                const response = {
+                    count: docs.length,
+                    tasks: docs.map(docs => {
+                        return{
+                            id: docs._id,
+                            title: docs.title, 
+                            description: docs.description,
+                        }
+                    })
+                };
+                res.status(200).json(response);
                 // if (docs.length >= 0){
-                    res.status(200).json(docs);
+                    //res.status(200).json(docs);
                 // }else{
                 //     res.status(200).json({ message: 'No entries found!'})
                 // }
-                
             })
             .catch(err => {
                 res.status(500).json({ message: err});
@@ -45,7 +54,7 @@ router.post('/todos/', (req, res, next) => {
 
     todos_list.save()
         .then( result => {
-            console.log(result);})
+            console.log('Created todos-list');})
         .catch(err => { 
             console.log(err)
             res.status(500).json({ message: err});
@@ -58,6 +67,7 @@ router.post('/todos/', (req, res, next) => {
 });
 
 router.get('/todos/:todos_id', (req, res, next) => { 
+    // this get retrives all the task elements of a specific todos-list (id = todos_id)
     const receveidId = req.params.todos_id;
 
     Todos.findById(receveidId)
@@ -90,27 +100,27 @@ router.delete('/todos/:todos_id', (req, res, next) => {
         res.status(500).json({ message: err});
     });
 
+    // just initial test: 
     // res.status(200).json({
     //     message : 'Handling DELETE request for a specific todo-list (DELETE id)',
-    //     todo_list_id : receveidId
     // });
 });
 
 router.patch('/todos/:todos_id', (req, res, next) => { 
     const receveidId = req.params.todos_id;
     console.log(receveidId);
-    // // Todos.update({ _id: id }, { $set: { title: req.params.title , description: req.params.description} });
+       
     const updateOps = {};
     for (const ops of req.body){
         console.log(ops.propName);
         console.log(ops.value);
         updateOps[ops.propName] = ops.value;
     }
-    console.log(updateOps);
+    // console.log(updateOps);
     Todos.updateMany({ _id: receveidId }, { $set: updateOps })
     .exec()
     .then( result => {
-        console.log(result);
+        // console.log(result);
         res.status(200).json(result);
     })
     .catch( err => {

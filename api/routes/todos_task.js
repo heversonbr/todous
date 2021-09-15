@@ -3,15 +3,16 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const TodoTask = require('../models/todos_task');
 
-// Routing refers to determining how an application responds to a client request to a particular endpoint, which is a URI (or path) and a specific HTTP request method (GET, POST, and so on).
-// Each route can have one or more handler functions, which are executed when the route is matched.
+// Routing refers to determining how an application responds to a client request to 
+// a particular endpoint, which is a URI (or path) and a specific HTTP request method 
+// (GET, POST, and so on). Each route can have one or more handler functions, which 
+// are executed when the route is matched.
 // I want something like this: 
-//  /todos                         : all todo-lists
-//  /todos/todos-id/               : one specific todo-list
-//  /todos/todos-id/full           : all elements of a specific todo list 
-//  /todos/todos-id/todo-item-id/  : a specific element of a specific todo list
-// Remind: each model is associated with one collection (table) in the database.
-//         so, we will create 2 routes here one for each table.
+// /api/todotasks/                     : all tasks of all todo lists
+// /api/todotasks/:task_id             : a specific tasks element
+// /api/todotasks/todos-list/:todos_id : all tasks from a specific todo-list
+// Remind: each model is associated with one collection (table) in 
+// the database. So, we will create 2 routes here one for each table.
 
 // read all tasks from all lists
 router.get('/todotasks/', (req, res, next) => { 
@@ -22,7 +23,7 @@ router.get('/todotasks/', (req, res, next) => {
 
     // read all tasks from all lists
     TodoTask.find()
-        .select('id task created dueDate status todoListId ')   // we can use the select method to select specific fields and show only the ones we are interested in
+        .select('id task created dueDate status todoListId')   // we can use the select method to select specific fields and show only the ones we are interested in
         .exec()
         .then( docs => { 
             // the result of the find+select will the in 'docs' we can still manipulated 'docs'  for creating a more convinient result.   
@@ -56,6 +57,7 @@ router.get('/todotasks/', (req, res, next) => {
 
 // create a task into a specific list (need to choose the list in advance)
 router.post('/todotasks/', (req, res, next) => { 
+    // first creat 
     const todo_task = new TodoTask({
         _id: new mongoose.Types.ObjectId(),
         task: req.body.task,
@@ -67,7 +69,7 @@ router.post('/todotasks/', (req, res, next) => {
 
     todo_task.save()
         .then( result => {
-            console.log(result);})
+            console.log('Created todo-task');})
         .catch(err => { 
             console.log(err)
             res.status(500).json({ message: err});

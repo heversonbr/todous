@@ -2,7 +2,7 @@
 
 == REST API 
 
-keep in mind resource CRUD (create, read, update, delete).
+Keep in mind resource CRUD (create, read, update, delete).
 
 
 == Installing node.js 
@@ -36,7 +36,7 @@ $ node -v
 v16.3.0
 ----
 
-== Modulos
+== Modules
 
 === Using package.json
 
@@ -86,32 +86,46 @@ By default, NPM installs any dependency in the local mode. Here local mode refer
 $ npm install --save express
 ----
 
-=== Postman 
+=== dotenv
 
-Postman is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streamlines collaboration so you can create better APIs—faster.
+Dotenv is a zero-dependency module that loads environment variables from a .env file into process.env. Storing configuration in the environment separate from code is based on link:https://12factor.net/config[The Twelve-Factor] App methodology.
+
+
 [source, bash]
 ----
-$ brew install --cask postman
+$ npm install dotenv --save
 ----
- 
-=== Nodemon
 
-Nodemon is a utility that will monitor for any changes in your source and automatically restart your server. Perfect for development.
+
+As early as possible in your application, require and configure dotenv.
+
+[source, javascript]
+----
+require('dotenv').config()
+----
+
+
+Create a `.env` file in the root directory of your project. 
+Add environment-specific variables on new lines in the form of NAME=VALUE. For example:
+
 [source, bash]
 ----
-$ npm install --save-dev nodemon
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=s1mpl3
 ----
 
-Now in order to start the server, instead of using `node server.js` we will use `nodemon server.js` (for global install).
+`process.env` now has the keys and values you defined in your .env file
 
-Note that, if nodemon is not globally install we have to add the nodemon execution as an script in the `package.json` file. To do that, go to the 'scripts section' in the `package.json` file and add the following:
-
-[source, json]
+[source, javascript]
 ----
-"start": "nodemon server.js"
+{
+    host: process.env.DB_HOST,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASS
+}
 ----
 
-Then we will start our serve using `npm start`.
 
 === Morgan 
 
@@ -172,13 +186,41 @@ to your app entrypoint ('app.js').
 
 More about this package: link:https://www.npmjs.com/package/body-parser[here]
 
+=== Nodemon
+
+Nodemon is a utility that will monitor for any changes in your source and automatically restart your server. Perfect for development.
+[source, bash]
+----
+$ npm install --save-dev nodemon
+----
+
+Now in order to start the server, instead of using `node server.js` we will use `nodemon server.js` (for global install).
+
+Note that, if nodemon is not globally install we have to add the nodemon execution as an script in the `package.json` file. To do that, go to the 'scripts section' in the `package.json` file and add the following:
+
+[source, json]
+----
+"start": "nodemon server.js"
+----
+
+Then we will start our serve using `npm start`.
+
+
+=== Postman 
+
+Postman is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streamlines collaboration so you can create better APIs—faster.
+[source, bash]
+----
+$ brew install --cask postman
+----
+
+
+
 === mongodb 
 
 
 MongoDB is a document database designed for ease of development and scaling. 
 In this tutorial we will use MongoDB as our application's database. 
-
-Deploying MongoDB with docker. Offical image  link:https://hub.docker.com/_/mongo/[here]
 
 ----
 $ docker run -d -p 27017:27017 -v  $(pwd)/data/db:/data/db -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=admin --name mymongo mongo
@@ -186,9 +228,12 @@ $ docker run -d -p 27017:27017 -v  $(pwd)/data/db:/data/db -e MONGO_INITDB_ROOT_
 
 MongoDB on mac osx with brew: link:https://attacomsian.com/blog/install-mongodb-macos
 
+Deploying MongoDB with docker. Offical image  link:https://hub.docker.com/_/mongo/[here]
+
+
+==== MongoDB Compass
 MongoDB Compass is a powerful GUI for querying, aggregating, and analyzing your MongoDB data in a visual environment.
-Compass is free to use and source available, and can be run on macOS, Windows, and Linux.
-Install MongoDB Compass on mac os with brew: 
+Compass is free to use and source available, and can be run on macOS, Windows, and Linux. Install MongoDB Compass on mac os with brew: 
 
 ----
 $ brew install mongodb-compass
@@ -207,14 +252,71 @@ Mongoose is a MongoDB object modeling tool designed to work in an asynchronous e
 $ npm install mongoose --save 
 ----
 
+Connect your app with mongodb:
+
+[source, javascript]
+----
+mongoose.connect('mongodb://localhost:27017/mongoose_basics');
+----
 
 
+== Hello World example with node.js and express 
 
-== Creating a REST API with node.js 
-
-. Create a new app/module 
+=== Create a new app/module 
 ----
 $ npm init 
 ----
+
+=== Server and app content
+
+.server.js
+[source, javascript]
+----
+const http = require('http');
+const app = require('./app');
+
+const port = process.env.port || 3000;
+const server = http.createServer(app);
+server.listen(port);
+
+console.log('Server up!');
+----
+
+.app.js
+[source, javascript]
+----
+const express = require('express');
+const app = express();
+
+app.use( (req, res, next) => { 
+    res.status(200).json({
+        message : 'Hello! it works'
+    });
+
+});
+
+module.exports = app;
+----
+
+
+
+=== Start the app server
+
+.with node only
+----
+$ node server.js
+----
+
+.with nodemon package (global instalation)
+----
+$ nodemon server.js
+----
+
+.with nodemon package (local instalation)
+----
+$ npm start
+----
+Remind that, for local installation we need to add a script in `package.json`. 
+
 
 

@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+
+  mongodb-srv:
+    env_file: ./.env
+    image: $MONGODB_IMAGE_TAG
+    container_name: $MONGODB_CONTAINER
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD
+    # networks:
+    #   - todo-network
+    ports:
+      - $MONGODB_HOST_PORT:$MONGODB_CONTAINER_PORT
+    volumes:
+      - $MONGODB_HOST_VOL:$MONGODB_CONTAINER_VOL
+    restart: $MONGODB_RESTART_POLICY
+
+  nodejs-srv:
+    env_file: ./.env
+    depends_on:
+      - mongodb-srv
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: $NODEJS_IMAGE_TAG
+    container_name: $NODEJS_CONTAINER
+    restart: $NODEJS_RESTART_POLICY
+    # networks:
+    #   - todo-network
+    ports:
+      - $NODEJS_HOST_PORT:$NODEJS_CONTAINER_PORT
+    volumes:
+      - $NODEJS_HOST_VOL:$NODEJS_CONTAINER_VOL
+    environment:
+      - DB_HOST=mongodb
+      - DB_USER=$MONGODB_USER
+      - DB_PASSWORD=$MONGODB_PASSWORD
+      - DB_NAME=$MONGODB_DATABASE
+
+# networks:
+#   todo-network:
