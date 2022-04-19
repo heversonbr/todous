@@ -1,0 +1,178 @@
+// These are the request tests 
+// It depends on the VSCode's 'REST-Client' plugin
+// We use it to test our API request methods  
+
+// Variables used by all requests.
+@port = 8888
+@host = localhost
+@contentType = application/json
+
+//###################################################################
+// TASKS
+// ##################################################################
+
+// 1) GET: READ all TASKs from any list (independent of their todo-list id)
+GET http://{{host}}:{{port}}/api/todotasks
+###
+
+// 2)  GET: READ a specific TASK (given a task_id)
+@task_id = 61632b591be5a78bdf984f3d
+GET http://{{host}}:{{port}}/api/todotasks/{{task_id}}
+###
+
+// 3) GET: READ ALL TASKS from a specific todo-list (given the todo-list id)
+@todo_id = 61632afc1be5a78bdf984f37
+GET http://{{host}}:{{port}}/api/todotasks//{{todo_id}}
+
+###
+
+// 4) POST: CREATE A TASK into a specific list (must pass todo lis id in the req.body obj)
+@todo_id = 123
+POST http://{{host}}:{{port}}/api/todotasks
+Content-Type: application/json
+
+{
+    "task": "tarefa 2",
+    "dueDate": "2021-03-11",
+    "status": "open",
+    "todoListId": {{todo_id}}
+}
+
+###
+
+// 5) DELETE a specific TASK (given a task id)
+@task_id = 61632b491be5a78bdf984f3b
+DELETE http://{{host}}:{{port}}/api/todotasks/{{task_id}}
+###
+
+// 6) UPDATE a specific task (given a task id)
+@task_id = 61632b491be5a78bdf984f3b
+PATCH http://{{host}}:{{port}}/api/todotasks/{{task_id}}
+Content-Type: application/json
+
+[
+    {   
+        "propName" : "title" , 
+        "value": "LISTA 2!"
+    },
+    {   
+        "propName" : "description" , 
+        "value": "nova descrition 2"
+    }
+]
+###
+
+//###################################################################
+// TO-DO LISTS 
+//###################################################################
+@todo_id = 62478c2de0c9526f21e30cfe
+
+// 1) GET: READ all TODO LISTS
+GET http://{{host}}:{{port}}/api/todos
+###
+
+// 2) GET: READ a specific TODO LIST (given its id)
+GET http://{{host}}:{{port}}/api/todos/{{todo_id}}
+###
+
+// 3) GET , read all TASKS of a specific TODO LIST 
+GET http://{{host}}:{{port}}/api/todotasks/todos-list/{{todo_id}}
+###
+
+// 4) POST: CREATE a new TODO LIST 
+POST http://{{host}}:{{port}}/api/todos/
+Content-Type: application/json
+
+// json object to send
+{
+    "title": "Lista 3" ,
+    "description": "Minha lista 3"
+}
+###
+
+// 5) DELETE a specific TODO LIST (given its id)
+DELETE http://{{host}}:{{port}}/api/todos/{{todo_id}}
+
+###
+
+// 6) UPDATE a specific TODO LIST (given its id)
+PATCH http://{{host}}:{{port}}/api/todos/{{todo_id}}
+Content-Type: application/json
+
+[
+    {   
+        "propName" : "title" , 
+        "value": "LISTA 2!"
+    },
+    {   
+        "propName" : "description" , 
+        "value": "nova descrition 2"
+    }
+]
+###
+
+//###################################################################
+// Authentication
+//###################################################################
+
+// 1) POST: REGISTER a new user
+POST http://{{host}}:{{port}}/api/register
+Content-Type: application/json
+
+{
+    "firstname": "john",
+    "lastname" :  "doe",
+    "email"    : "john@doe.com",
+    "password" :  "12345678"
+}
+###
+
+//###################################################################
+// 2) GET: READ all USERS  (admin only)
+
+GET http://{{host}}:{{port}}/api/admin/users
+###
+
+
+//###################################################################
+// 3) POST: user login 
+POST http://{{host}}:{{port}}/api/login
+Content-Type: application/json
+
+{
+    "email" : "john@doe.com",
+    "password" : "12345678"
+}
+###
+
+//###################################################################
+// GET: READ dashboard 
+GET http://{{host}}:{{port}}/api/dashboard
+Content-Type: application/json
+###
+
+//###################################################################
+
+// logout 
+GET http://{{host}}:{{port}}/api/logout
+Content-Type: application/json
+
+###
+
+//###################################################################
+
+// GET: READ login page (load login form) 
+GET http://{{host}}:{{port}}/api/login
+Content-Type: application/json
+
+###
+
+//###################################################################
+
+// GET: READ REGISTER page
+GET http://{{host}}:{{port}}/api/register
+Content-Type: application/json
+
+###
+
+//###################################################################

@@ -1,142 +1,165 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const Todos = require('../models/todos');
+const Todos = require('../models/Todo');
 
-// Routing refers to determining how an application responds to a client request to a particular endpoint, which is a URI (or path) and a specific HTTP request method (GET, POST, and so on).
+const {loginRequired}  = require('../middlewares/authController');
+// logging package: https://www.npmjs.com/package/node-color-log
+// levels : // success < debug < info < warn < error < disable 
+const logger = require('node-color-log');
+logger.setLevel(process.env.LOGGER_LEVEL); 
+
+// Routing refers to determining how an application responds to a client request 
+// to a particular endpoint, which is a URI (or path) and a specific HTTP request method (GET, POST, and so on).
 // Each route can have one or more handler functions, which are executed when the route is matched.
-// I want something like this: 
-//  /api/todos                         : all todo-lists
-//  /api/todos/:todos_id               : one specific todo-list
+// In this API we want to provide the following: 
+//  /api/todos                    : read all todo-lists of a specific user
+//  /api/todos/:todos_id          : read one specific todo-list of a specific user
 
 // Remind: each model is associated with one collection (table) in the database.
-//         so, we will create 2 routes here one for each table.
+//   
 
-router.get('/todos/', (req, res, next) => { 
-// Remind: this is the get http that the api server will receive from the browser
-  
-        Todos.find()
-            .select('id title description') 
-            .exec()
-            .then( docs => {
-                // console.log(docs);
-                const response = {
-                    count: docs.length,
-                    tasks: docs.map(docs => {
-                        return{
-                            id: docs._id,
-                            title: docs.title, 
-                            description: docs.description,
-                        }
-                    })
-                };
-                res.status(200).json(response);
-                // if (docs.length >= 0){
-                    //res.status(200).json(docs);
-                // }else{
-                //     res.status(200).json({ message: 'No entries found!'})
-                // }
-            })
-            .catch(err => {
-                res.status(500).json({ message: err});
-            } );
+// GET: READ all todo lists of a specific (logged) user
+router.get('/todos/' ,loginRequired , (req, res, next) => { 
+    // NOTE:  user information comes from the session object, 
+    //        loginRequired is used to ensure user validation
+    logger.debug('---------------------------------------------------------');
+    logger.debug('/todos/ -> req.session.userId: ' + req.session.userId);
+    logger.debug('/todos/ -> req.user._id: ' + req.user._id);
+    logger.debug('---------------------------------------------------------');
+    Todos.find({ owner: req.user._id })
+        .select('id title description owner') 
+        .exec()
+        .then( docs => {
+            const response = {
+                count: docs.length,
+                todolists: docs.map(docs => {
+                    return{
+                        id: docs._id,
+                        title: docs.title, 
+                        description: docs.description,
+                        owner: docs.owner
+                    }
+                })
+            };
+            //res.status(200).json(response);   
+            return res.status(200).json({status: 'SUCCESS' , response: response});
+        })
+        .catch(err => {
+            //res.status(500).json({ message: err});
+            return res.status(500).json({status: 'FAIL' , message: err});
+        } );
+
 });
 
-// remind: this is the post http that the api server will receive from the browser
-router.post('/todos/', (req, res, next) => { 
-    // We get the post with the info that comes to the browser and we instantiate a new 
-    // object Todos, declared/created under models. 
+// POST: CREATE a new todo list 
+router.post('/todos/' ,loginRequired , (req, res, next) => { 
+    // We get the post with the info that comes to the browser and we instantiate a new object Todos, declared/created under models. 
+    // NOTE: session is used to get the user_id and store user as todo-owner. loginRequired is used to ensure user is authenticaticated
+    logger.debug('---------------------------------------------------------');
+    logger.debug('/todos/ -> req.session.userId: ' + req.session.userId);
+    logger.debug('/todos/ -> req.user._id: ' + req.user._id);
+    logger.debug('---------------------------------------------------------');
     const todos_list = new Todos({
         _id: new mongoose.Types.ObjectId(),
         title: req.body.title,
-        description: req.body.description 
+        description: req.body.description,
+        owner: new mongoose.Types.ObjectId(req.user._id)
     });
 
     todos_list.save()
         .then( result => {
-            console.log('Created todos-list');})
+            logger.debug('Created todos-list');})
         .catch(err => { 
-            console.log(err)
-            res.status(500).json({ message: err});
+            logger.error(err);
+            return res.status(500).json({ status: 'FAIL' , message: err});
         });
 
-    res.status(201).json({
-        message : 'performed POST request for todo list',
-        todo_list : todos_list  
-    });
+    return res.status(200).json({status: 'SUCCESS' , response: todos_list});
+
 });
 
-router.get('/todos/:todos_id', (req, res, next) => { 
+// GET: READ a specific todo list (given its id)
+router.get('/todos/:todo_id', loginRequired, (req, res, next) => { 
     // this get retrives all the task elements of a specific todos-list (id = todos_id)
-    const receveidId = req.params.todos_id;
+    const receveidId = req.params.todo_id;
 
-    Todos.findById(receveidId)
+    logger.debug('---------------------------------------------------------');
+    logger.debug('READ /todos/:todo_id -> req.session.userId: ' + req.session.userId);
+    logger.debug('READ /todos/:todo_id -> req.user._id: ' + req.user._id);
+    logger.debug('receveidId: ' + receveidId);
+    logger.debug('---------------------------------------------------------');
+
+    //Todos.findById(receveidId)
+    Todos.find({ _id: receveidId , owner: req.user._id })
         .exec()
         .then( doc => {
+            logger.debug(doc)
             if (doc) {
-                res.status(200).json(doc);
+                return res.status(200).json({ status: 'SUCCESS' , response: doc });
             } else {
-                res.status(404).json({ message: 'No valid id found for the provided id'})
+                return res.status(204).json({ status: 'FAIL' , message: 'Not found'})
             }
         })
         .catch(err => { 
-            console.log(err)
-            res.status(500).json({ message: err});
+            logger.error(err);
+            return res.status(500).json({ status: 'FAIL' , message: err });
         });
 });
 
-router.delete('/todos/:todos_id', (req, res, next) => { 
-    // console.log('delete method: ');
-    const receveidId = req.params.todos_id;
-    console.log(receveidId);
+// DELETE a specific todo list (given its id)
+router.delete('/todos/:todo_id', loginRequired, (req, res, next) => { 
+ 
+    const receveidId = req.params.todo_id;
+    logger.debug('---------------------------------------------------------');
+    logger.debug('DELETE /todos/:todo_id -> req.session.userId: ' + req.session.userId);
+    logger.debug('DELETE /todos/:todo_id -> req.user._id: ' + req.user._id);
+    logger.debug('receveidId: ' + receveidId);
+    logger.debug('---------------------------------------------------------');
 
-    Todos.deleteOne({ _id: receveidId })
+    Todos.deleteOne({ _id: receveidId , owner: req.user._id })
     .exec()
     .then( result => {
-        res.status(200).json(result);
+        res.status(200).json({ status: 'SUCCESS' , response: result });
     })
     .catch( err => { 
-        console.log(err)
-        res.status(500).json({ message: err});
+        logger.error(err);
+        res.status(500).json({ status: 'FAIL' , message: err});
     });
 
-    // just initial test: 
-    // res.status(200).json({
-    //     message : 'Handling DELETE request for a specific todo-list (DELETE id)',
-    // });
 });
 
-router.patch('/todos/:todos_id', (req, res, next) => { 
-    const receveidId = req.params.todos_id;
-    console.log(receveidId);
-       
+// UPDATE a specific todo list (given its id)
+router.patch('/todos/:todo_id', loginRequired, (req, res, next) => { 
+    
+    const receveidId = req.params.todo_id;
+    logger.debug('-------------------------------------------------------------------------');
+    logger.debug('DELETE /todos/:todo_id -> req.session.userId: ' + req.session.userId);
+    logger.debug('DELETE /todos/:todo_id -> req.user._id: ' + req.user._id);
+    logger.debug('receveidId: ' + receveidId);
+    logger.debug('req.body: ');
+    logger.debug(req.body);
+    logger.debug('-------------------------------------------------------------------------');
+
     const updateOps = {};
     for (const ops of req.body){
-        console.log(ops.propName);
-        console.log(ops.value);
+        logger.debug('ops.propName: ' + ops.propName);
+        logger.debug('ops.value: ' + ops.value);
         updateOps[ops.propName] = ops.value;
     }
-    // console.log(updateOps);
-    Todos.updateMany({ _id: receveidId }, { $set: updateOps })
+    // logger.debug(updateOps);
+    Todos.updateMany({ _id: receveidId , owner: req.user._id}, { $set: updateOps })
     .exec()
     .then( result => {
-        // console.log(result);
-        res.status(200).json(result);
+        logger.debug(result);
+        return res.status(200).json({ status: 'SUCCESS' , response: result });
     })
     .catch( err => {
-        console.log(err);
-        res.status(500).json({
-            message: err,
-        })
+        logger.error(err);
+        return res.status(500).json({ status: 'FAIL' , message: err, })
     });
-    // res.status(200).json({
-    //     message : 'Handling PATCH request for a specific todo-list (UPDATE LIST)',
-    //     id : receveidId
-    // });
+
 });
-
-
-
 
 module.exports = router;
 

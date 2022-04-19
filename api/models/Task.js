@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 // Everything in Mongoose starts with a Schema. 
 // Each schema maps to a MongoDB collection and defines the shape of the documents within that collection.
-const todoTaskSchema = mongoose.Schema({
+const taskSchema = mongoose.Schema({
 
     _id: mongoose.Types.ObjectId,
     
@@ -24,11 +24,19 @@ const todoTaskSchema = mongoose.Schema({
     },
 
     todoListId: {
-        type: String,
-        required: true
-    }
+        type: mongoose.Types.ObjectId,
+        required: true,
+        ref: 'Todos'
+    },
+
+    owner: {
+        type: mongoose.Types.ObjectId,
+        required: true,
+        ref: 'User'
+    },
 });
-// To use our schema definition, we need to convert it into a Model we can work with.
+// NOTE: To use our schema definition, 
+// we need to convert it into a Model we can work with.
 // A Model is a class that's your primary tool for interacting with MongoDB. 
 // An instance of a Model is called a Document.
-module.exports = mongoose.model('TodoTask', todoTaskSchema);
+module.exports = mongoose.model('TodoTask', taskSchema);

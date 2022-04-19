@@ -1,0 +1,10 @@
+rest_api_nodejs.adoc
+LICENSE
+.git
+.git*
+README.md
+docker-compose.yml
+sync_rasp.sh
+
+local_dev_server_start.sh
+rsync_exclude_files.txt

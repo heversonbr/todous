@@ -1,7 +1,13 @@
+.dockerignore
+.env_bkp
+
 .DS_Store
 node_modules
 .vscode
-app_hello_world.js
-.env
+
+dockercompose.yml
+Dockerfile.nodejs
+
 .package-lock.json
-sync_rasp5.sh
+./tests
+./scripts

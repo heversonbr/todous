@@ -1,0 +1,34 @@
+@startuml
+
+
+participant WebBrowser as client
+participant AppServer as appserver 
+control DebugSessionMiddleware as debugSession
+boundary loadUserFromSession as loaduser
+database MongoDB as db  
+participant loginHandler as router_login
+participant dashboardHandler as router_dashboard
+
+client -> appserver: POST: /api/login {username/pass}
+appserver --> debugSession: print session params
+note right: req.sessionID: JLbuRfMQGQ2nV1GzDyhUB0aVmPhWN0Uc
+
+appserver --> loaduser: load 'req.user' user-object
+loaduser --> db: check if 'req.session.userId' exists 
+loaduser <-- db: req.user = user (if 'req.session.userId' exists)
+note left: req.user = undefined
+
+appserver -> router_login: POST /api/login {username/pass}
+router_login --> db: validate username/pass
+router_login <-- db
+note right: user/pass validated
+appserver <-- router_login: redirect to dashboard
+client <- appserver: 302 redirect /api/dashboard, set-Cookie=JLbuRfMQGQ2nV1GzDyhUB0aVmPhWN0Uc
+
+client -> appserver: GET: /api/dashboard, Cookie=JLbuRfMQGQ2nV1GzDyhUB0aVmPhWN0Uc
+appserver --> debugSession: print session params
+note right: req.sessionID: XPSBHoCi2Vdyv20kXiBsOba0A39_Vqfv, Cookie=JLbuRfMQGQ2nV1GzDyhUB0aVmPhWN0Uc
+
+
+
+@enduml
